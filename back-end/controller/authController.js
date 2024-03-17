@@ -18,7 +18,7 @@ module.exports.signIn = async (req, res) => {
         if (!compareData(password, existingUser.password))
             return res.status(401).json({ error: 'Incorrect password' });
 
-        const token = jwt.sign({ userId: existingUser.userId, createdAt: existingUser.createdAt },
+        const token = jwt.sign({ userId: existingUser.userId, role: existingUser.role },
             process.env.JWT_PRIVATE_KEY,
             { expiresIn: '8h' }
         );
@@ -26,11 +26,14 @@ module.exports.signIn = async (req, res) => {
         res.cookie('token', token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });
 
         return res.status(200).json({
-            message: "logged in successfull!!"
+            message: "LogIn Successfull!!"
         })
 
     } catch (error) {
         console.log(error.message)
+        return res.status(500).json({
+            message: "Internal Server Error!!"
+        })
     }
 }
 
@@ -76,3 +79,17 @@ module.exports.signUp = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+module.exports.signOut = async (req, res) => {
+    try {
+
+        res.clearCookie('token');
+        req.status(200).json({ message: "SignOut Successfull!!" })
+
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({
+            message: "Internal Server Error!!"
+        })
+    }
+}
