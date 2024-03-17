@@ -1,0 +1,11 @@
+{
+  "name": "project_manager",
+  "version": "1.0.0",
+  "description": "full project",
+  "main": "index.js",
+  "scripts": {
+    "start-server": "nodemon ./back-end/index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

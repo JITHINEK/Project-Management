@@ -1,5 +1,6 @@
-const User = require('../model/user');
+const jwt = require('jsonwebtoken');
 
+const User = require('../model/user');
 const { hashData, compareData } = require('../utils/bcrypt');
 
 module.exports.signIn = async (req, res) => {
@@ -8,15 +9,24 @@ module.exports.signIn = async (req, res) => {
         const { userId, password } = req.body;
 
         if (!userId || !password)
-            return res.status(400).json({ error: 'Missing credentials!' });
+            return res.status(401).json({ error: 'Missing credentials!' });
 
         const existingUser = await User.findOne({ $or: [{ userId }] });
         if (!existingUser)
-            return res.status(400).json({ error: 'User with the provided userId does not exists' });
+            return res.status(404).json({ error: 'User with the provided userId does not exists' });
 
-        console.log(existingUser)
+        if (!compareData(password, existingUser.password))
+            return res.status(401).json({ error: 'Incorrect password' });
+
+        const token = jwt.sign({ userId: existingUser.userId, createdAt: existingUser.createdAt },
+            process.env.JWT_PRIVATE_KEY,
+            { expiresIn: '8h' }
+        );
+
+        res.cookie('token', token, { httpOnly: true, maxAge: 8 * 3600 * 1000 });
+
         return res.status(200).json({
-            message: "logged in success full"
+            message: "logged in successfull!!"
         })
 
     } catch (error) {
